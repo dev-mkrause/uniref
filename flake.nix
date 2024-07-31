@@ -9,22 +9,28 @@
 
   outputs = { self, nixpkgs, flake-utils, clj-nix }:
 
-    flake-utils.lib.eachDefaultSystem (system: {
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+        {
+          packages = {
+            default = clj-nix.lib.mkCljApp {
+              pkgs = nixpkgs.legacyPackages.${system};
+              modules = [
+                # Option list:
+                # https://jlesquembre.github.io/clj-nix/options/
+                {
+                  projectSrc = ./.;
+                  name = "uniref";
+                  main-ns = "uniref.core";
+                }
+              ];
+            };
+          };
 
-      packages = {
-        default = clj-nix.lib.mkCljApp {
-          pkgs = nixpkgs.legacyPackages.${system};
-          modules = [
-            # Option list:
-            # https://jlesquembre.github.io/clj-nix/options/
-            {
-              projectSrc = ./.;
-              name = "uniref";
-              main-ns = "uniref.core";
-            }
-          ];
-        };
-
-      };
-    });
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [ clojure ];
+          };
+        });
 }
