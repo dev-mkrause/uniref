@@ -1,0 +1,2 @@
+{:sort-ns-references? t
+ :remove-multiple-non-indenting-spaces? t}
